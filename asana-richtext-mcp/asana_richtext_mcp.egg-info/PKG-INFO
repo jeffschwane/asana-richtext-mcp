@@ -1,0 +1,7 @@
+Metadata-Version: 2.4
+Name: asana-richtext-mcp
+Version: 0.1.0
+Summary: Minimal Asana MCP with html_text support for rich text comments
+Requires-Python: >=3.12
+Requires-Dist: mcp[cli]>=1.11.0
+Requires-Dist: httpx>=0.27.0
