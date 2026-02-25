@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "asana-richtext-mcp"
-version = "0.1.0"
+version = "0.2.0"
 requires-python = ">=3.12"
-description = "Minimal Asana MCP with html_text support for rich text comments"
+description = "Asana MCP server with full task CRUD and rich text support via PAT"
 
 dependencies = [
     "mcp[cli]>=1.11.0",
