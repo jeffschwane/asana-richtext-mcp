@@ -104,6 +104,9 @@ def get_tasks(
     :param offset: Pagination offset token.
     :return: List of tasks from Asana.
     """
+    if not any([project, section, tag]):
+        return {"error": True, "status_code": 400, "message": "At least one of project, section, or tag is required"}
+
     params: dict[str, Any] = {"limit": min(max(limit, 1), 100)}
     if project:
         params["project"] = project
@@ -190,7 +193,7 @@ def search_tasks(
             for field_gid, value in cf.items():
                 params[f"custom_fields.{field_gid}.value"] = value
         except (json.JSONDecodeError, AttributeError):
-            pass
+            return {"error": True, "status_code": 400, "message": "Invalid custom_fields JSON"}
 
     response = httpx.get(
         f"{ASANA_API_BASE}/workspaces/{workspace_id}/tasks/search",
@@ -253,7 +256,7 @@ def update_task(
         try:
             data["custom_fields"] = json.loads(custom_fields)
         except json.JSONDecodeError:
-            pass
+            return {"error": True, "status_code": 400, "message": "Invalid custom_fields JSON"}
 
     response = httpx.put(
         f"{ASANA_API_BASE}/tasks/{task_id}",
