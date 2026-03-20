@@ -1,9 +1,10 @@
 """
 Asana MCP server with full task CRUD and rich text support.
 
-Wraps Asana's REST API using a Personal Access Token. Provides rich text
-comment/notes support (html_text) that the official Asana MCP server lacks,
-plus task read/search/update operations for headless automation.
+Wraps Asana's REST API using an OAuth access token or Personal Access Token.
+Provides rich text comment/notes support (html_text) that the official Asana
+MCP server lacks, plus task read/search/update operations for headless
+automation.
 """
 
 import json
@@ -20,11 +21,11 @@ ASANA_API_BASE = "https://app.asana.com/api/1.0"
 
 
 def _get_token() -> str:
-    token = os.environ.get("ASANA_PAT")
+    token = os.environ.get("ASANA_ACCESS_TOKEN") or os.environ.get("ASANA_PAT")
     if not token:
         raise ValueError(
-            "ASANA_PAT environment variable not set. "
-            "Create a Personal Access Token at https://app.asana.com/0/my-apps"
+            "No Asana token found. Set ASANA_ACCESS_TOKEN (OAuth) or "
+            "ASANA_PAT (Personal Access Token)."
         )
     return token
 
