@@ -7,6 +7,7 @@ MCP server lacks, plus task read/search/update operations for headless
 automation.
 """
 
+import html
 import json
 import os
 from typing import Any
@@ -35,6 +36,18 @@ def _headers() -> dict[str, str]:
         "Authorization": f"Bearer {_get_token()}",
         "Content-Type": "application/json",
     }
+
+
+def _fix_double_encoded_html(text: str) -> str:
+    """Unescape HTML entities when the caller has entity-encoded the markup.
+
+    LLMs sometimes send ``&lt;strong&gt;`` instead of ``<strong>``.  Detect
+    this by looking for encoded angle brackets and unescape once so the
+    Asana API receives real HTML tags.
+    """
+    if "&lt;" in text and "&gt;" in text:
+        text = html.unescape(text)
+    return text
 
 
 def _error_response(response: httpx.Response) -> dict[str, Any]:
@@ -325,6 +338,8 @@ def create_rich_comment(task_id: str, html_text: str) -> dict:
     :param html_text: HTML-formatted comment text wrapped in <body> tags.
     :return: The created story/comment data from Asana.
     """
+    html_text = _fix_double_encoded_html(html_text)
+
     if not html_text.strip().startswith("<body>"):
         html_text = f"<body>{html_text}</body>"
 
@@ -355,6 +370,8 @@ def update_task_notes(task_id: str, html_notes: str) -> dict:
     :param html_notes: HTML-formatted notes wrapped in <body> tags.
     :return: The updated task data from Asana.
     """
+    html_notes = _fix_double_encoded_html(html_notes)
+
     if not html_notes.strip().startswith("<body>"):
         html_notes = f"<body>{html_notes}</body>"
 
