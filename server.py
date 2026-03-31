@@ -10,6 +10,7 @@ automation.
 import html
 import json
 import os
+import re
 from typing import Any
 
 import httpx
@@ -48,6 +49,16 @@ def _fix_double_encoded_html(text: str) -> str:
     if "&lt;" in text and "&gt;" in text:
         text = html.unescape(text)
     return text
+
+
+def _strip_unsupported_tags(text: str) -> str:
+    """Replace <br>, <br/>, and <br /> with newlines.
+
+    Asana's story API does not support <br> tags in html_text — their
+    presence causes the entire comment to be entity-encoded and rendered
+    as raw text.
+    """
+    return re.sub(r"<br\s*/?>", "\n", text, flags=re.IGNORECASE)
 
 
 def _error_response(response: httpx.Response) -> dict[str, Any]:
@@ -339,6 +350,7 @@ def create_rich_comment(task_id: str, html_text: str) -> dict:
     :return: The created story/comment data from Asana.
     """
     html_text = _fix_double_encoded_html(html_text)
+    html_text = _strip_unsupported_tags(html_text)
 
     if not html_text.strip().startswith("<body>"):
         html_text = f"<body>{html_text}</body>"
@@ -371,6 +383,7 @@ def update_task_notes(task_id: str, html_notes: str) -> dict:
     :return: The updated task data from Asana.
     """
     html_notes = _fix_double_encoded_html(html_notes)
+    html_notes = _strip_unsupported_tags(html_notes)
 
     if not html_notes.strip().startswith("<body>"):
         html_notes = f"<body>{html_notes}</body>"
