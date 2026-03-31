@@ -58,7 +58,7 @@ def _strip_unsupported_tags(text: str) -> str:
     presence causes the entire comment to be entity-encoded and rendered
     as raw text.
     """
-    return re.sub(r"<br\s*/?>", "\n", text)
+    return re.sub(r"<br\s*/?>", "\n", text, flags=re.IGNORECASE)
 
 
 def _error_response(response: httpx.Response) -> dict[str, Any]:
