@@ -295,6 +295,44 @@ def update_task(
 
 
 # ---------------------------------------------------------------------------
+# Subtasks
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+def get_subtasks(
+    task_id: str, opt_fields: str = "", limit: int = 100, offset: str = ""
+) -> dict:
+    """
+    Get subtasks of an Asana task.
+
+    Returns the list of subtasks with their name, completion status, and
+    other requested fields.
+
+    :param task_id: The parent Asana task GID.
+    :param opt_fields: Comma-separated optional fields to include.
+    :param limit: Results per page (1-100).
+    :param offset: Pagination offset token.
+    :return: Subtasks for the given task.
+    """
+    params: dict[str, Any] = {"limit": min(max(limit, 1), 100)}
+    if opt_fields:
+        params["opt_fields"] = opt_fields
+    if offset:
+        params["offset"] = offset
+
+    response = httpx.get(
+        f"{ASANA_API_BASE}/tasks/{task_id}/subtasks",
+        headers=_headers(),
+        params=params,
+        timeout=30.0,
+    )
+    if response.status_code != 200:
+        return _error_response(response)
+    return response.json()
+
+
+# ---------------------------------------------------------------------------
 # Stories / Comments
 # ---------------------------------------------------------------------------
 
